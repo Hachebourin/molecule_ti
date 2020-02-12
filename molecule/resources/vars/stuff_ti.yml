@@ -1,0 +1,24 @@
+---
+haproxy_no_log: false
+
+haproxy_http_port: 80
+
+# frontend section
+haproxy_frontend:
+  - name: 'haproxy_frontend_http'
+    bind:
+      ip: "0.0.0.0"
+      listen: 8080
+    properties:
+      option: 'tcplog'
+      default_backend: 'haproxy_backend_http'
+
+# backend section
+haproxy_backend:
+  - name: 'haproxy_backend_http'
+    properties:
+      mode: 'tcp'
+      option: 'httpchk GET /'
+    srv_backend:
+      servers: "{{ groups['srv_web'] }}"
+      port: "{{ haproxy_http_port }}"

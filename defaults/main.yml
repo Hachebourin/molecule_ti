@@ -1,0 +1,51 @@
+---
+haproxy_install: true
+haproxy_configure: true
+haproxy_no_log: true
+
+haproxy_version: '1.8.13'
+haproxy_pkg_name: 'haproxy'
+
+haproxysysctl_conf:
+  - name: 'net.ipv4.ip_nonlocal_bind'
+    value: '1'
+    state: 'present'
+
+haproxy_log_rotate: 10
+haproxy_log_rotate_freq: 'daily'
+
+haproxy_vips: []
+
+haproxy_sbin_dir: "/usr/sbin"
+
+haproxy_stats_enabled: false
+haproxy_stats_user: 'admin'
+haproxy_stats_user_password: 'changeit'
+haproxy_stats_port: ''
+haproxy_stats_uri: '/admin?stats'
+haproxy_http_port: ''
+haproxy_https_port: ''
+haproxy_backend_timeout_connect: '1m'
+haproxy_backend_timeout_server: '3m'
+haproxy_retries: '3'
+haproxy_client_timeout: '3m'
+haproxy_frontend:
+  - name: 'http-in'
+    bind:
+      ip: '*'
+      listen: '80'
+    option: 'tcplog'
+    default_backend: 'legacy'
+haproxy_backend:
+  - name: 'legacy'
+    srv_backend:
+      servers: {'localhost'}
+      port: "{{ haproxy_http_port }}"
+      maxconn: 100
+
+haproxy_templates:
+  - src: 'haproxy_config.j2'
+    dest: "/etc/haproxy/haproxy.cfg"
+    owner: "{{ _haproxy_user }}"
+    group: "{{ _haproxy_group }}"
+    mode: '0640'

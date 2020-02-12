@@ -1,0 +1,7 @@
+---
+- name: "Installation de la souche"
+  import_tasks: install.yml
+
+- name: "Configuration de la souche haproxy"
+  import_tasks: configure.yml
+  when: haproxy_configure

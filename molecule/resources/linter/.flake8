@@ -1,0 +1,69 @@
+# .flake8
+#
+# DESCRIPTION
+#       Configuration file for the python linter flake8.
+#
+#       This configuration is based on the generic
+#       configuration published on GitHub.
+#
+
+
+[flake8]
+
+# Specify the number of subprocesses that Flake8 will use to run checks in parallel.
+jobs = auto
+
+################### OUTPUT #################################
+
+########## VERBOSITY ##########
+
+# Increase the verbosity of Flake8’s output.
+verbose = 0
+# Decrease the verbosity of Flake8’s output.
+quiet = 0
+
+########## FORMATTING ##########
+
+# Select the formatter used to display errors to the user.
+format = default
+
+# Print the total number of errors.
+count = True
+# Print the source code generating the error/warning in question.
+show-source = True
+# Count the number of occurrences of each error/warning code and print a report.
+statistics = True
+
+################### FILE PATTERNS ##########################
+
+# Provide a comma-separated list of glob patterns to exclude from checks.
+exclude =
+    # git folder
+    .git,
+    # python cache
+    __pycache__,
+# Provide a comma-separate list of glob patterns to include for checks.
+filename =
+    *.py
+
+################### LINTING ################################
+
+########## OPTIONS ##########
+
+# Report all errors, even if it is on the same line as a `# NOQA` comment.
+disable-noqa = False
+
+# Set the maximum allowed McCabe complexity value for a block of code.
+max-complexity = 10
+
+########## RULES ##########
+
+# W503 - line break before binary operator
+# E501 - line length
+# E402 - module level import not at top of file
+
+# Specify a list of codes to ignore.
+ignore =
+    W503
+    E501
+    E402

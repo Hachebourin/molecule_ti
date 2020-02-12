@@ -1,0 +1,5 @@
+---
+- name: "Installation de haproxy"
+  yum:
+    name: "{{ haproxy_pkg_name }}"
+    state: present

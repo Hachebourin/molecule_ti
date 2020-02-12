@@ -1,0 +1,37 @@
+---
+
+- name: "Installation du serveur web"
+  become: true
+  hosts: srv_web
+  tasks:
+    - name: "Installation de httpd"
+      yum:
+        name: 'httpd'
+        state: 'present'
+
+    - name: "Activation du service httpd"
+      systemd:
+        name: 'httpd'
+        state: 'started'
+        enabled: true
+        masked: false
+
+    - name: "MAJ du fichier index.html"
+      lineinfile:
+        path: '/var/www/html/index.html'
+        line: "Hostname: {{ inventory_hostname }}"
+        create: true
+
+- name: "Configuration pour openstack"
+  become: true
+  hosts: haproxy
+  tasks:
+    - name: "Ajout des IPs des machines dans /etc/hosts"
+      blockinfile:
+        path: '/etc/hosts'
+        block: |
+          {% for server in groups['srv_web'] -%}
+          {{ hostvars[server]['ansible_default_ipv4']['address'] }} {{ server }}
+          {% endfor %}
+        marker: "# {mark} ANSIBLE MANAGED BLOCK"
+      when: molecule_yml['driver']['name'] == 'openstack'

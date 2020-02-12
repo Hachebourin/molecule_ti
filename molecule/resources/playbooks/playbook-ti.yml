@@ -1,0 +1,8 @@
+---
+- name: "Installation d'haproxy"
+  become: true
+  hosts: haproxy
+  vars_files:
+    - ../vars/stuff_ti.yml
+  roles:
+    - role: molecule_ti

@@ -1,0 +1,3 @@
+---
+_haproxy_user: 'haproxy'
+_haproxy_group: 'haproxy'

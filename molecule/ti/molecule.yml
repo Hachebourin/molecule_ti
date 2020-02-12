@@ -1,0 +1,90 @@
+---
+dependency:
+  name: galaxy
+  options:
+    role-file: ${MOLECULE_PROJECT_DIRECTORY}/molecule/resources/requirements/requirements.yml
+
+driver:
+  name: docker
+
+lint:
+  name: yamllint
+  options:
+    config-file: molecule/resources/linter/.yamllint
+
+platforms:
+  - name: ha-1
+    groups:
+      - haproxy
+    image: "centos:7"
+    disable_cache: true
+    privileged: true
+    volume_mounts:
+      - "/sys/fs/cgroup:/sys/fs/cgroup:rw"
+    command: "/usr/sbin/init"
+    dockerfile: ../resources/dockerfiles/Dockerfile-systemd.j2
+    networks:
+      - name: lan_ha
+
+  - name: web-1
+    groups:
+      - srv_web
+    image: "centos:7"
+    disable_cache: true
+    privileged: true
+    volume_mounts:
+      - "/sys/fs/cgroup:/sys/fs/cgroup:rw"
+    command: "/usr/sbin/init"
+    dockerfile: ../resources/dockerfiles/Dockerfile-systemd.j2
+    networks:
+      - name: lan_ha
+
+  - name: web-2
+    groups:
+      - srv_web
+    image: "centos:7"
+    disable_cache: true
+    privileged: true
+    volume_mounts:
+      - "/sys/fs/cgroup:/sys/fs/cgroup:rw"
+    command: "/usr/sbin/init"
+    dockerfile: ../resources/dockerfiles/Dockerfile-systemd.j2
+    networks:
+      - name: lan_ha
+
+provisioner:
+  name: ansible
+  options:
+    user: vagrant
+  lint:
+    name: ansible-lint
+    options:
+      c: molecule/resources/linter/.ansiblelint
+  playbooks:
+    prepare: ../resources/playbooks/prepare-ti.yml
+    converge: ../resources/playbooks/playbook-ti.yml
+
+scenario:
+  name: ti
+  test_sequence:
+    - dependency
+    - lint
+    - syntax
+    - create
+    - prepare
+    - converge
+    - idempotence
+    - verify
+    - destroy
+
+verifier:
+  name: testinfra
+  directory: ../resources/tests/ti
+  options:
+    sudo: true
+    verbose: true
+    s: true
+  lint:
+    name: flake8
+    options:
+      config: molecule/resources/linter/.flake8

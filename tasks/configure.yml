@@ -1,0 +1,23 @@
+---
+
+# - name: "Creation des repertoires"
+#  file:
+#    path: "{{ item.path }}"
+#    state: "{{ item.state }}"
+#    mode: "{{ item.mode }}"
+#    owner: "{{ item.owner }}"
+#    group: "{{ item.group }}"
+#  with_items:
+#    - "{{ haproxy_install_folders }}"
+
+- name: "Template et validation des configurations haproxy"
+  template:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    mode: "{{ item.mode }}"
+    owner: "{{ item.owner }}"
+    group: "{{ item.group }}"
+    validate: "{{ haproxy_sbin_dir }}/haproxy -c -V -f %s"
+  with_items:
+    - "{{ haproxy_templates }}"
+  notify: haproxy_restart

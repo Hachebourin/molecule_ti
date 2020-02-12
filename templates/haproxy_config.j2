@@ -1,0 +1,58 @@
+global
+  log 127.0.0.1 local0
+  stats socket /run/haproxy.sock level admin
+  stats timeout 30s
+  {% if haproxy_stats_global_maxconn is defined -%}
+  maxconn {{ haproxy_stats_global_maxconn }}
+  {% endif -%}
+  pidfile /run/haproxy.pid
+  daemon
+  user {{ _haproxy_user }}
+  group {{ _haproxy_group }}
+
+defaults
+  log global
+  mode tcp
+  retries {{ haproxy_retries }}
+  timeout connect {{ haproxy_backend_timeout_connect }}
+  timeout client {{ haproxy_client_timeout }}
+  timeout server {{ haproxy_backend_timeout_server }}
+  option log-health-checks
+
+{% if haproxy_stats_enabled and haproxy_stats_user_password != 'changeit' %}
+listen stats
+  bind {{ ansible_default_ipv4.address }}:{{ haproxy_stats_port }}
+  mode http
+  stats enable
+  stats uri {{ haproxy_stats_uri }}
+  stats refresh 5s
+  stats realm Haproxy\ Statistics
+  stats auth {{ haproxy_stats_user }}:{{ haproxy_stats_user_password }}
+{% endif %}
+
+
+{% for frontend in haproxy_frontend %}
+frontend {{ frontend.name }}
+  bind {{ frontend.bind.ip }}:{{ frontend.bind.listen }}
+  {% if frontend.properties is defined -%}
+  {% for key, value in frontend.properties.items() -%}
+  {{ key }} {{ value }}
+  {% endfor %}
+  {%- endif %}
+
+{% endfor %}
+
+{% for backend in haproxy_backend %}
+backend {{ backend.name }}
+  {% if backend.properties is defined -%}
+  {% for key, value in backend.properties.items() -%}
+  {{ key }} {{ value }}
+  {% endfor %}
+  {%- endif %}
+
+  {% for server in backend.srv_backend.servers -%}
+  server srv_backend{{ loop.index }} {{ server }}:{{ backend.srv_backend.port }} id {{ loop.index }} {% if backend.srv_backend.maxconn is defined %} maxconn {{ backend.srv_backend.maxconn }}{% endif %} {% if backend.srv_backend.srv_options is defined %}{{ backend.srv_backend.srv_options }}{% endif %}
+
+  {% endfor %}
+
+{% endfor %}
